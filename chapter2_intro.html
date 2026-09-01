@@ -17,7 +17,6 @@
   #dialogue-box .who { color: #ffdd55; font-size: 11px; letter-spacing: 3px; margin-bottom: 6px; display: block; text-shadow: 0 0 8px rgba(255,221,85,0.6); }
 
   #skip-hint { position: absolute; bottom: 14px; right: 20px; color: #345; font-size: 11px; letter-spacing: 2px; z-index: 12; }
-
 </style>
 </head>
 <body>
@@ -34,29 +33,36 @@ window.addEventListener('resize', resize);
 resize();
 
 // ============================================================
+// SCRIPT — this is the only part you need to touch to add more.
+// Beat types:
+//   { type:'line', text, duration, who }   -> shows dialogue
+//   { type:'ring' }                        -> starts the phone ringing, pacing halts
+//   { type:'end' }                         -> triggers the automatic fade-to-black
+// Add new beats anywhere in this array — nothing else needs editing.
+// ============================================================
 const SCRIPT = [
-  { type:'line', text:"Another dissappearance again this week", duration:3200, who:'JOHN' },
-  { type:'line', text:"No it can't be related", duration:2600, who:'JOHN' },
-  { type:'line', text:"2 years. 2 years and I still can't stop thinking about that incident", duration:3600, who:'JOHN' },
+  { type:'line', text:"Another twelve-hour day. Great.", duration:3200, who:'JOHN' },
+  { type:'line', text:"I told myself I wasn't going to think about that place again.", duration:3800, who:'JOHN' },
+  { type:'line', text:"Three weeks. Three weeks and it's still all I think about.", duration:3600, who:'JOHN' },
   { type:'ring' },
-  { type:'line', text:"....Who's calling this late.", duration:2700, who:'JOHN' },
-  { type:'line', text:"Hello?", duration:2600, who:'JOHN' },
-  { type:'line', text:"...", duration:2600, who:'???' },
+  { type:'line', text:"...Who's calling this late.", duration:2600, who:'JOHN' },
+  { type:'line', text:"Hello?", duration:1800, who:'JOHN' },
+  { type:'line', text:"...", duration:1600, who:'???' },
   { type:'line', text:"Go back to the school.", duration:2800, who:'???' },
   { type:'line', text:"What? Who is this? How did you get this number—", duration:3200, who:'JOHN' },
   { type:'line', text:"You already know why. Go back to the school, John.", duration:3600, who:'???' },
-  { type:'line', text:"The corruption has started again.", duration:3600, who:'???' },
-  { type:'line', text:"Wha- What's the hell is this corruption thing", duration:3400, who:'JOHN' },
-  { type:'line', text:"...No n̵̢̨͉̻͙̹͚͈͖̜̺̦̬̾̿̈́̆̑́͋̒́̒̉͠ͅo̶̧̙͍̪̯̼̬̝̘͒̌̈̈́̈́͜t̵̲́̄̀̀̈́͊̐̽̍̂ now. it's to e̶̢̮̣͕̳͓̖͚͓̫̰̯̤̅̅̿̈̚͠a̸̧̳̮̥̞͎͙̜͌̊͌ͅͅŗ̴̢̬̖̫͇͚̮̺̜̰̈l̸͙̻̳̜̖͕̥͎͎̦̯͑͋͛̕͜͠y̶̦̯̦͎̯̙̘̥̼̒", duration:3000, who:'???' },
-  { type:'line', text:"Hello? HELLO?!", duration:3000, who:'JOHN' },
-  { type:'line', text:"...", duration 3000, who:'JOHN' },
+  { type:'line', text:"There are still secrets in there.", duration:3400, who:'???' },
+  { type:'line', text:"Hello? HELLO?", duration:2400, who:'JOHN' },
+  { type:'line', text:"...", duration:1800, who:'JOHN' },
   { type:'line', text:"No. No, I'm not going back there.", duration:3000, who:'JOHN' },
   { type:'line', text:"...", duration:1600, who:'JOHN' },
-  { type:'line', text:"Corruption..Corruption", duration:2800, who:'JOHN' },
-  { type:'line', text:"I need to investigate this", duration:2800, who:'JOHN' },
+  { type:'line', text:"Still secrets in there.", duration:2800, who:'JOHN' },
   { type:'end' }
 ];
 
+// ============================================================
+// ENGINE — you shouldn't need to edit below this line.
+// ============================================================
 let frameCount = 0;
 let beatIdx = 0;
 let ringing = false;
@@ -74,7 +80,7 @@ window.addEventListener('keydown', e => {
   if (e.key === ' ') { e.preventDefault(); skipRequested = true; }
 });
 
-
+// ---- procedural sound (no audio files needed) ----
 let audioCtx = null;
 let ringInterval = null;
 function ensureAudio() {
@@ -99,7 +105,6 @@ function beep(freq, duration, type = 'sine', gainPeak = 0.15, startDelay = 0) {
 }
 
 function playRingBurst() {
-  // classic two-tone landline ring: 950Hz + 1400Hz together, ~1.8s on
   beep(950, 1.8, 'sine', 0.08);
   beep(1400, 1.8, 'sine', 0.06);
 }
@@ -123,7 +128,7 @@ function playNextBeat() {
     john.standing = true;
     startRingSound();
     beatIdx++;
-    return; // waits for player to "answer" via click, see update()
+    return;
   }
 
   if (beat.type === 'end') {
@@ -177,8 +182,6 @@ function onIntroDone() {
   }
 }
 
-// Top-down office layout, centered on screen. All coords are room-local
-// (origin at room center) so the room scales cleanly with window size.
 function officeRect() {
   const w = canvas.width, h = canvas.height;
   const rw = Math.min(w * 0.6, 700), rh = Math.min(h * 0.6, 500);
@@ -192,11 +195,9 @@ function drawOffice() {
   const { cx, cy, rw, rh } = officeRect();
   const left = cx - rw / 2, top = cy - rh / 2;
 
-  // floor
   ctx.fillStyle = '#14181c'; ctx.fillRect(left, top, rw, rh);
   ctx.strokeStyle = '#2a3540'; ctx.lineWidth = 4; ctx.strokeRect(left, top, rw, rh);
 
-  // window, seen from above as a bright strip along the top wall
   const winW = rw * 0.35;
   ctx.fillStyle = 'rgba(120,170,220,0.18)';
   ctx.fillRect(cx - winW / 2, top - 2, winW, 6);
@@ -206,25 +207,21 @@ function drawOffice() {
     ctx.beginPath(); ctx.moveTo(rx, top - 2); ctx.lineTo(rx, top + 4); ctx.stroke();
   }
 
-  // desk, top-down (a flat rectangle against the right wall)
   const deskW = rw * 0.22, deskH = rh * 0.32;
   const deskX = left + rw * 0.72, deskY = cy;
   ctx.fillStyle = '#1c1610'; ctx.strokeStyle = '#4a3a22'; ctx.lineWidth = 2;
   ctx.fillRect(deskX - deskW / 2, deskY - deskH / 2, deskW, deskH);
   ctx.strokeRect(deskX - deskW / 2, deskY - deskH / 2, deskW, deskH);
 
-  // chair (small circle) tucked at the desk
   ctx.fillStyle = '#241a0e'; ctx.strokeStyle = '#6b4d22'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(deskX, deskY + deskH / 2 + 18, 14, 0, 7); ctx.fill(); ctx.stroke();
 
-  // lamp glow on the desk corner
   ctx.save();
   ctx.shadowBlur = 22; ctx.shadowColor = '#ffcf70';
   ctx.fillStyle = 'rgba(255,207,112,0.5)';
   ctx.beginPath(); ctx.arc(deskX - deskW / 2 + 12, deskY - deskH / 2 + 12, 6, 0, 7); ctx.fill();
   ctx.restore();
 
-  // phone on the desk
   const phoneX = deskX, phoneY = deskY;
   const ringPulse = ringing ? (Math.sin(frameCount * 0.6) * 0.5 + 0.5) : 0;
   ctx.save();
@@ -241,7 +238,6 @@ function drawOffice() {
     ctx.textAlign = 'left';
   }
 
-  // bookshelf against the left wall, top-down
   ctx.fillStyle = '#1a1408'; ctx.strokeStyle = '#6b4d22'; ctx.lineWidth = 2;
   ctx.fillRect(left + 14, cy - rh * 0.25, 20, rh * 0.5);
   ctx.strokeRect(left + 14, cy - rh * 0.25, 20, rh * 0.5);
@@ -265,8 +261,6 @@ function drawJohn() {
     jy = top + rh * 0.6;
   }
 
-  // simple 2D top-down marker: a plain glowing dot, no face — same visual
-  // language as the player marker in the main game.
   ctx.save();
   ctx.shadowBlur = 15; ctx.shadowColor = '#00e5ff';
   ctx.fillStyle = '#eafffe';
@@ -290,7 +284,7 @@ function loop() {
     if (fadeAlpha >= 1 && !transitioned) {
       transitioned = true;
       onIntroDone();
-      return; // stop the loop once we've handed off
+      return;
     }
   }
 
