@@ -34,36 +34,29 @@ window.addEventListener('resize', resize);
 resize();
 
 // ============================================================
-// SCRIPT — this is the only part you need to touch to add more.
-// Beat types:
-//   { type:'line', text, duration, who }   -> shows dialogue
-//   { type:'ring' }                        -> starts the phone ringing, pacing halts
-//   { type:'end' }                         -> shows the "GO BACK TO THE SCHOOL" button
-// Add new beats anywhere in this array — nothing else needs editing.
-// ============================================================
 const SCRIPT = [
-  { type:'line', text:"Another twelve-hour day. Great.", duration:3200, who:'JOHN' },
-  { type:'line', text:"I told myself I wasn't going to think about that place again.", duration:3800, who:'JOHN' },
-  { type:'line', text:"Three weeks. Three weeks and it's still all I think about.", duration:3600, who:'JOHN' },
+  { type:'line', text:"Another dissappearance again this week", duration:3200, who:'JOHN' },
+  { type:'line', text:"No it can't be related", duration:2600, who:'JOHN' },
+  { type:'line', text:"2 years. 2 years and I still can't stop thinking about that incident", duration:3600, who:'JOHN' },
   { type:'ring' },
-  { type:'line', text:"...Who's calling this late.", duration:2600, who:'JOHN' },
-  { type:'line', text:"Hello?", duration:1800, who:'JOHN' },
-  { type:'line', text:"...", duration:1600, who:'???' },
+  { type:'line', text:"....Who's calling this late.", duration:2700, who:'JOHN' },
+  { type:'line', text:"Hello?", duration:2600, who:'JOHN' },
+  { type:'line', text:"...", duration:2600, who:'???' },
   { type:'line', text:"Go back to the school.", duration:2800, who:'???' },
   { type:'line', text:"What? Who is this? How did you get this number—", duration:3200, who:'JOHN' },
   { type:'line', text:"You already know why. Go back to the school, John.", duration:3600, who:'???' },
-  { type:'line', text:"There are still secrets in there.", duration:3400, who:'???' },
-  { type:'line', text:"Hello? HELLO?", duration:2400, who:'JOHN' },
-  { type:'line', text:"...", duration:1800, who:'JOHN' },
+  { type:'line', text:"The corruption has started again.", duration:3600, who:'???' },
+  { type:'line', text:"Wha- What's the hell is this corruption thing", duration:3400, who:'JOHN' },
+  { type:'line', text:"...No n̵̢̨͉̻͙̹͚͈͖̜̺̦̬̾̿̈́̆̑́͋̒́̒̉͠ͅo̶̧̙͍̪̯̼̬̝̘͒̌̈̈́̈́͜t̵̲́̄̀̀̈́͊̐̽̍̂ now. it's to e̶̢̮̣͕̳͓̖͚͓̫̰̯̤̅̅̿̈̚͠a̸̧̳̮̥̞͎͙̜͌̊͌ͅͅŗ̴̢̬̖̫͇͚̮̺̜̰̈l̸͙̻̳̜̖͕̥͎͎̦̯͑͋͛̕͜͠y̶̦̯̦͎̯̙̘̥̼̒", duration:3000, who:'???' },
+  { type:'line', text:"Hello? HELLO?!", duration:3000, who:'JOHN' },
+  { type:'line', text:"...", duration 3000, who:'JOHN' },
   { type:'line', text:"No. No, I'm not going back there.", duration:3000, who:'JOHN' },
   { type:'line', text:"...", duration:1600, who:'JOHN' },
-  { type:'line', text:"Still secrets in there.", duration:2800, who:'JOHN' },
+  { type:'line', text:"Corruption..Corruption", duration:2800, who:'JOHN' },
+  { type:'line', text:"I need to investigate this", duration:2800, who:'JOHN' },
   { type:'end' }
 ];
 
-// ============================================================
-// ENGINE — you shouldn't need to edit below this line.
-// ============================================================
 let frameCount = 0;
 let beatIdx = 0;
 let ringing = false;
@@ -81,9 +74,7 @@ window.addEventListener('keydown', e => {
   if (e.key === ' ') { e.preventDefault(); skipRequested = true; }
 });
 
-// ---- procedural sound (no audio files needed) ----
-// Browsers block audio until the player interacts, so we lazily create/resume
-// the AudioContext on the first click or keypress.
+
 let audioCtx = null;
 let ringInterval = null;
 function ensureAudio() {
@@ -120,7 +111,6 @@ function stopRingSound() {
   clearInterval(ringInterval); ringInterval = null;
 }
 function playLineBlip() {
-  // a soft blip each time a new line of dialogue appears
   beep(320 + Math.random() * 80, 0.05, 'square', 0.03);
 }
 
