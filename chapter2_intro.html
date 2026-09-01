@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Central City Merit High | Chapter 2 - The Call</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+
+  #dialogue-box { position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%); max-width: 620px; width: 88%;
+    background: rgba(4,7,9,0.88); border: 2px solid #2a3a44; border-radius: 6px; padding: 14px 24px; text-align: center;
+    color: #e6fffb; font-size: 18px; letter-spacing: 0.5px; line-height: 1.4; box-shadow: 0 0 20px rgba(0,0,0,0.7);
+    z-index: 12; opacity: 0; transition: opacity 0.4s ease; pointer-events: none; white-space: pre-line; }
+  #dialogue-box.show { opacity: 1; }
+  #dialogue-box .who { color: #ffdd55; font-size: 11px; letter-spacing: 3px; margin-bottom: 6px; display: block; text-shadow: 0 0 8px rgba(255,221,85,0.6); }
+
+  #skip-hint { position: absolute; bottom: 14px; right: 20px; color: #345; font-size: 11px; letter-spacing: 2px; z-index: 12; }
+
+</style>
+</head>
+<body>
+
+<canvas id="scene"></canvas>
+<div id="dialogue-box"><span class="who">JOHN</span><span id="dialogue-text"></span></div>
+<div id="skip-hint">PRESS SPACE TO SKIP LINE</div>
+
+<script>
+const canvas = document.getElementById('scene');
+const ctx = canvas.getContext('2d');
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize);
+resize();
+
+// ============================================================
+// SCRIPT — this is the only part you need to touch to add more.
+// Beat types:
+//   { type:'line', text, duration, who }   -> shows dialogue
+//   { type:'ring' }                        -> starts the phone ringing, pacing halts
+//   { type:'end' }                         -> shows the "GO BACK TO THE SCHOOL" button
+// Add new beats anywhere in this array — nothing else needs editing.
+// ============================================================
+const SCRIPT = [
+  { type:'line', text:"Another twelve-hour day. Great.", duration:3200, who:'JOHN' },
+  { type:'line', text:"I told myself I wasn't going to think about that place again.", duration:3800, who:'JOHN' },
+  { type:'line', text:"Three weeks. Three weeks and it's still all I think about.", duration:3600, who:'JOHN' },
+  { type:'ring' },
+  { type:'line', text:"...Who's calling this late.", duration:2600, who:'JOHN' },
+  { type:'line', text:"Hello?", duration:1800, who:'JOHN' },
+  { type:'line', text:"...", duration:1600, who:'???' },
+  { type:'line', text:"Go back to the school.", duration:2800, who:'???' },
+  { type:'line', text:"What? Who is this? How did you get this number—", duration:3200, who:'JOHN' },
+  { type:'line', text:"You already know why. Go back to the school, John.", duration:3600, who:'???' },
+  { type:'line', text:"There are still secrets in there.", duration:3400, who:'???' },
+  { type:'line', text:"Hello? HELLO?", duration:2400, who:'JOHN' },
+  { type:'line', text:"...", duration:1800, who:'JOHN' },
+  { type:'line', text:"No. No, I'm not going back there.", duration:3000, who:'JOHN' },
+  { type:'line', text:"...", duration:1600, who:'JOHN' },
+  { type:'line', text:"Still secrets in there.", duration:2800, who:'JOHN' },
+  { type:'end' }
+];
+
+// ============================================================
+// ENGINE — you shouldn't need to edit below this line.
+// ============================================================
+let frameCount = 0;
+let beatIdx = 0;
+let ringing = false;
+let ringPhase = 0;
+let phoneAnswered = false;
+let skipRequested = false;
+let dialogueTimer = null;
+let fading = false;
+let fadeAlpha = 0;
+let transitioned = false;
+
+const john = { paceMin: -160, paceMax: 160, t: 0, dir: 1, speed: 0.012, standing: false };
+
+window.addEventListener('keydown', e => {
+  if (e.key === ' ') { e.preventDefault(); skipRequested = true; }
+});
+
+// ---- procedural sound (no audio files needed) ----
+// Browsers block audio until the player interacts, so we lazily create/resume
+// the AudioContext on the first click or keypress.
+let audioCtx = null;
+let ringInterval = null;
+function ensureAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+window.addEventListener('click', ensureAudio, { once: true });
+window.addEventListener('keydown', ensureAudio, { once: true });
+
+function beep(freq, duration, type = 'sine', gainPeak = 0.15, startDelay = 0) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  const t0 = audioCtx.currentTime + startDelay;
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(gainPeak, t0 + 0.02);
+  gain.gain.linearRampToValueAtTime(0, t0 + duration);
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0 + duration + 0.02);
+}
+
+function playRingBurst() {
+  // classic two-tone landline ring: 950Hz + 1400Hz together, ~1.8s on
+  beep(950, 1.8, 'sine', 0.08);
+  beep(1400, 1.8, 'sine', 0.06);
+}
+function startRingSound() {
+  playRingBurst();
+  ringInterval = setInterval(playRingBurst, 3800);
+}
+function stopRingSound() {
+  clearInterval(ringInterval); ringInterval = null;
+}
+function playLineBlip() {
+  // a soft blip each time a new line of dialogue appears
+  beep(320 + Math.random() * 80, 0.05, 'square', 0.03);
+}
+
+function playNextBeat() {
+  if (beatIdx >= SCRIPT.length) return;
+  const beat = SCRIPT[beatIdx];
+
+  if (beat.type === 'ring') {
+    ringing = true;
+    john.standing = true;
+    startRingSound();
+    beatIdx++;
+    return; // waits for player to "answer" via click, see update()
+  }
+
+  if (beat.type === 'end') {
+    fading = true; // triggers the automatic fade-to-black in loop()
+    beatIdx++;
+    return;
+  }
+
+  // type === 'line'
+  const box = document.getElementById('dialogue-box');
+  const txt = document.getElementById('dialogue-text');
+  const whoEl = box.querySelector('.who');
+  txt.textContent = beat.text;
+  whoEl.textContent = beat.who || 'JOHN';
+  playLineBlip();
+  box.classList.add('show');
+  clearTimeout(dialogueTimer);
+  skipRequested = false;
+
+  const advance = () => {
+    box.classList.remove('show');
+    setTimeout(() => { beatIdx++; playNextBeat(); }, 350);
+  };
+
+  const checkSkip = () => {
+    if (skipRequested) { clearTimeout(dialogueTimer); advance(); }
+    else dialogueTimer = setTimeout(checkSkip, 50);
+  };
+  dialogueTimer = setTimeout(checkSkip, 50);
+  setTimeout(() => { if (!skipRequested) advance(); }, beat.duration);
+}
+
+canvas.addEventListener('click', () => {
+  if (ringing && !phoneAnswered) {
+    phoneAnswered = true;
+    ringing = false;
+    stopRingSound();
+    playNextBeat();
+  }
+});
+
+function onIntroDone() {
+  // Called automatically once the fade-to-black finishes.
+  // If this file has been merged into copythis.html, startGame() will already
+  // exist on window — call straight into the school level. Until then, show
+  // a placeholder so you can confirm the transition timing looks right.
+  if (typeof window.startGame === 'function') {
+    window.startGame('easy');
+  } else {
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#000;color:#00e5ff;font-size:14px;letter-spacing:2px;">[ transition to school level goes here — startGame() not found, merge this into copythis.html ]</div>';
+  }
+}
+
+// Top-down office layout, centered on screen. All coords are room-local
+// (origin at room center) so the room scales cleanly with window size.
+function officeRect() {
+  const w = canvas.width, h = canvas.height;
+  const rw = Math.min(w * 0.6, 700), rh = Math.min(h * 0.6, 500);
+  return { cx: w / 2, cy: h / 2, rw, rh };
+}
+
+function drawOffice() {
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#0a0c0e'; ctx.fillRect(0, 0, w, h);
+
+  const { cx, cy, rw, rh } = officeRect();
+  const left = cx - rw / 2, top = cy - rh / 2;
+
+  // floor
+  ctx.fillStyle = '#14181c'; ctx.fillRect(left, top, rw, rh);
+  ctx.strokeStyle = '#2a3540'; ctx.lineWidth = 4; ctx.strokeRect(left, top, rw, rh);
+
+  // window, seen from above as a bright strip along the top wall
+  const winW = rw * 0.35;
+  ctx.fillStyle = 'rgba(120,170,220,0.18)';
+  ctx.fillRect(cx - winW / 2, top - 2, winW, 6);
+  ctx.strokeStyle = 'rgba(160,190,220,0.4)'; ctx.lineWidth = 1;
+  for (let i = 1; i < 5; i++) {
+    const rx = cx - winW / 2 + (winW / 5) * i;
+    ctx.beginPath(); ctx.moveTo(rx, top - 2); ctx.lineTo(rx, top + 4); ctx.stroke();
+  }
+
+  // desk, top-down (a flat rectangle against the right wall)
+  const deskW = rw * 0.22, deskH = rh * 0.32;
+  const deskX = left + rw * 0.72, deskY = cy;
+  ctx.fillStyle = '#1c1610'; ctx.strokeStyle = '#4a3a22'; ctx.lineWidth = 2;
+  ctx.fillRect(deskX - deskW / 2, deskY - deskH / 2, deskW, deskH);
+  ctx.strokeRect(deskX - deskW / 2, deskY - deskH / 2, deskW, deskH);
+
+  // chair (small circle) tucked at the desk
+  ctx.fillStyle = '#241a0e'; ctx.strokeStyle = '#6b4d22'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(deskX, deskY + deskH / 2 + 18, 14, 0, 7); ctx.fill(); ctx.stroke();
+
+  // lamp glow on the desk corner
+  ctx.save();
+  ctx.shadowBlur = 22; ctx.shadowColor = '#ffcf70';
+  ctx.fillStyle = 'rgba(255,207,112,0.5)';
+  ctx.beginPath(); ctx.arc(deskX - deskW / 2 + 12, deskY - deskH / 2 + 12, 6, 0, 7); ctx.fill();
+  ctx.restore();
+
+  // phone on the desk
+  const phoneX = deskX, phoneY = deskY;
+  const ringPulse = ringing ? (Math.sin(frameCount * 0.6) * 0.5 + 0.5) : 0;
+  ctx.save();
+  ctx.shadowBlur = 8 + ringPulse * 22;
+  ctx.shadowColor = ringing ? '#ff3030' : '#334';
+  ctx.fillStyle = ringing ? `rgba(255,60,60,${0.5 + ringPulse * 0.5})` : '#221818';
+  ctx.fillRect(phoneX - 12, phoneY - 8, 24, 16);
+  ctx.restore();
+  if (ringing && !phoneAnswered) {
+    ctx.fillStyle = '#ff5050'; ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
+    ctx.fillText(Math.sin(frameCount * 0.3) > 0 ? 'RING RING' : '', phoneX, phoneY - 26);
+    ctx.font = '11px Courier New'; ctx.fillStyle = '#789';
+    ctx.fillText('(click the phone)', phoneX, phoneY + 34);
+    ctx.textAlign = 'left';
+  }
+
+  // bookshelf against the left wall, top-down
+  ctx.fillStyle = '#1a1408'; ctx.strokeStyle = '#6b4d22'; ctx.lineWidth = 2;
+  ctx.fillRect(left + 14, cy - rh * 0.25, 20, rh * 0.5);
+  ctx.strokeRect(left + 14, cy - rh * 0.25, 20, rh * 0.5);
+}
+
+function drawJohn() {
+  const { cx, cy, rw, rh } = officeRect();
+  const left = cx - rw / 2, top = cy - rh / 2;
+  const pacePad = 90;
+  const pMin = left + pacePad, pMax = left + rw * 0.45;
+
+  let jx, jy;
+  if (john.standing) {
+    jx = cx - rw * 0.05 + Math.sin(frameCount * 0.03) * 2;
+    jy = cy + Math.cos(frameCount * 0.03) * 2;
+  } else {
+    john.t += john.speed * john.dir;
+    if (john.t > 1) { john.t = 1; john.dir = -1; }
+    if (john.t < 0) { john.t = 0; john.dir = 1; }
+    jx = pMin + (pMax - pMin) * john.t;
+    jy = top + rh * 0.6;
+  }
+
+  // simple 2D top-down marker: a plain glowing dot, no face — same visual
+  // language as the player marker in the main game.
+  ctx.save();
+  ctx.shadowBlur = 15; ctx.shadowColor = '#00e5ff';
+  ctx.fillStyle = '#eafffe';
+  ctx.beginPath(); ctx.arc(jx, jy, 11, 0, 7); ctx.fill();
+  ctx.restore();
+
+  ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#8fd'; ctx.fillText('JOHN', jx, jy - 22);
+  ctx.textAlign = 'left';
+}
+
+function loop() {
+  frameCount++;
+  drawOffice();
+  drawJohn();
+
+  if (fading) {
+    fadeAlpha = Math.min(1, fadeAlpha + 0.015);
+    ctx.fillStyle = `rgba(0,0,0,${fadeAlpha})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    if (fadeAlpha >= 1 && !transitioned) {
+      transitioned = true;
+      onIntroDone();
+      return; // stop the loop once we've handed off
+    }
+  }
+
+  requestAnimationFrame(loop);
+}
+
+loop();
+setTimeout(playNextBeat, 800);
+</script>
+</body>
+</html>
