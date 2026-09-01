@@ -3,63 +3,65 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Central City Merit High | Chapter 2 - The Call</title>
+<title>Facility | Chapter 2 - The Call</title>
 <style>
- /* ============== MENU ============== */
-#menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: radial-gradient(ellipse at center, #0a0d0a 0%, #000 100%);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-
-#menu::before {
-  content: ""; position: absolute; inset: 0; opacity: 0.05; pointer-events: none;
-  background-image: repeating-linear-gradient(0deg, #4a6, 0px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #4a6, 0px, transparent 1px, transparent 40px);
-  animation: gridDrift 14s linear infinite;
-}
-@keyframes gridDrift { from { background-position: 0 0, 0 0; } to { background-position: 0 400px, 400px 0; } }
-
-#title-wrap { position: relative; display: flex; align-items: flex-start; margin-bottom: 6px; }
-
-#title-rest { font-size: 64px; font-weight: bold; letter-spacing: 4px; color: #8a7a5a;
-  text-shadow: 0 0 18px rgba(120,90,40,0.5), 3px 3px #000;
-  filter: saturate(0.7); }
-
-.f-letter { position: relative; width: 46px; height: 82px; margin-right: 2px; margin-top: 4px; }
-.f-stem { position: absolute; left: 4px; top: 0; width: 14px; height: 82px; background: #8a7a5a;
-  box-shadow: 0 0 18px rgba(120,90,40,0.5); border: 2px solid #4a3a20; }
-.f-bar-mid { position: absolute; left: 4px; top: 34px; width: 30px; height: 13px; background: #8a7a5a;
-  border: 2px solid #4a3a20; box-shadow: 0 0 14px rgba(120,90,40,0.4); }
-.f-bar-top { position: absolute; left: 4px; top: 0; width: 40px; height: 13px; background: #8a7a5a;
-  border: 2px solid #4a3a20; box-shadow: 0 0 14px rgba(120,90,40,0.4);
-  transform-origin: 6px 6px;
-  animation: swing 3.4s ease-in-out infinite; }
-@keyframes swing {
-  0%   { transform: rotate(-14deg); }
-  50%  { transform: rotate(9deg); }
-  100% { transform: rotate(-14deg); }
-}
-
-.moss-overlay { position: absolute; inset: -20px -30px; pointer-events: none; mix-blend-mode: multiply;
-  background:
-    radial-gradient(ellipse 40px 22px at 8% 90%, rgba(60,110,50,0.65), transparent 70%),
-    radial-gradient(ellipse 30px 18px at 22% 10%, rgba(70,120,55,0.55), transparent 70%),
-    radial-gradient(ellipse 50px 26px at 55% 95%, rgba(55,100,45,0.6), transparent 70%),
-    radial-gradient(ellipse 35px 20px at 78% 15%, rgba(65,115,50,0.5), transparent 70%),
-    radial-gradient(ellipse 45px 24px at 95% 80%, rgba(60,105,48,0.55), transparent 70%); }
-
-.vine { position: absolute; top: -18px; pointer-events: none; opacity: 0.9; }
-.vine.left { left: -34px; }
-.vine.right { right: -34px; transform: scaleX(-1); }
-
-#subtitle { color: #56704a; margin-bottom: 4px; letter-spacing: 3px; font-size: 13px; text-transform: uppercase; }
-#tagline { color: #4a5a44; margin-bottom: 26px; letter-spacing: 1px; font-size: 13px; text-align: center; max-width: 480px; }
-
-button { padding: 15px 40px; background: rgba(0,0,0,0.4); border: 2px solid #557a4a; color: #7fae6a; cursor: pointer;
-  font-weight: bold; margin: 10px; width: 240px; letter-spacing: 3px; transition: 0.25s; position: relative; font-family: inherit; }
-button:hover { background: #557a4a; color: #000; box-shadow: 0 0 25px currentColor; transform: scale(1.04); }>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
   canvas { display: block; width: 100vw; height: 100vh; }
 
+  /* ============== MENU ============== */
+  #menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: radial-gradient(ellipse at center, #0a0d0a 0%, #000 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+
+  #menu::before {
+    content: ""; position: absolute; inset: 0; opacity: 0.05; pointer-events: none;
+    background-image: repeating-linear-gradient(0deg, #4a6, 0px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #4a6, 0px, transparent 1px, transparent 40px);
+    animation: gridDrift 14s linear infinite;
+  }
+  @keyframes gridDrift { from { background-position: 0 0, 0 0; } to { background-position: 0 400px, 400px 0; } }
+
+  #title-wrap { position: relative; display: flex; align-items: flex-start; margin-bottom: 6px; }
+
+  #title-rest { font-size: 64px; font-weight: bold; letter-spacing: 4px; color: #8a7a5a;
+    text-shadow: 0 0 18px rgba(120,90,40,0.5), 3px 3px #000;
+    filter: saturate(0.7); }
+
+  .f-letter { position: relative; width: 46px; height: 82px; margin-right: 2px; margin-top: 4px; }
+  .f-stem { position: absolute; left: 4px; top: 0; width: 14px; height: 82px; background: #8a7a5a;
+    box-shadow: 0 0 18px rgba(120,90,40,0.5); border: 2px solid #4a3a20; }
+  .f-bar-mid { position: absolute; left: 4px; top: 34px; width: 30px; height: 13px; background: #8a7a5a;
+    border: 2px solid #4a3a20; box-shadow: 0 0 14px rgba(120,90,40,0.4); }
+  .f-bar-top { position: absolute; left: 4px; top: 0; width: 40px; height: 13px; background: #8a7a5a;
+    border: 2px solid #4a3a20; box-shadow: 0 0 14px rgba(120,90,40,0.4);
+    transform-origin: 6px 6px;
+    animation: swing 3.4s ease-in-out infinite; }
+  @keyframes swing {
+    0%   { transform: rotate(-14deg); }
+    50%  { transform: rotate(9deg); }
+    100% { transform: rotate(-14deg); }
+  }
+
+  .moss-overlay { position: absolute; inset: -20px -30px; pointer-events: none; mix-blend-mode: multiply;
+    background:
+      radial-gradient(ellipse 40px 22px at 8% 90%, rgba(60,110,50,0.65), transparent 70%),
+      radial-gradient(ellipse 30px 18px at 22% 10%, rgba(70,120,55,0.55), transparent 70%),
+      radial-gradient(ellipse 50px 26px at 55% 95%, rgba(55,100,45,0.6), transparent 70%),
+      radial-gradient(ellipse 35px 20px at 78% 15%, rgba(65,115,50,0.5), transparent 70%),
+      radial-gradient(ellipse 45px 24px at 95% 80%, rgba(60,105,48,0.55), transparent 70%); }
+
+  .vine { position: absolute; top: -18px; pointer-events: none; opacity: 0.9; }
+  .vine.left { left: -34px; }
+  .vine.right { right: -34px; transform: scaleX(-1); }
+
+  #subtitle { color: #56704a; margin-bottom: 4px; letter-spacing: 3px; font-size: 13px; text-transform: uppercase; }
+  #tagline { color: #4a5a44; margin-bottom: 26px; letter-spacing: 1px; font-size: 13px; text-align: center; max-width: 480px; }
+
+  button { padding: 15px 40px; background: rgba(0,0,0,0.4); border: 2px solid #557a4a; color: #7fae6a; cursor: pointer;
+    font-weight: bold; margin: 10px; width: 240px; letter-spacing: 3px; transition: 0.25s; position: relative; font-family: inherit; }
+  button:hover { background: #557a4a; color: #000; box-shadow: 0 0 25px currentColor; transform: scale(1.04); }
+
+  /* ============== SCENE ============== */
   #dialogue-box { position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%); max-width: 620px; width: 88%;
     background: rgba(4,7,9,0.88); border: 2px solid #2a3a44; border-radius: 6px; padding: 14px 24px; text-align: center;
     color: #e6fffb; font-size: 18px; letter-spacing: 0.5px; line-height: 1.4; box-shadow: 0 0 20px rgba(0,0,0,0.7);
@@ -68,10 +70,10 @@ button:hover { background: #557a4a; color: #000; box-shadow: 0 0 25px currentCol
   #dialogue-box .who { color: #ffdd55; font-size: 11px; letter-spacing: 3px; margin-bottom: 6px; display: block; text-shadow: 0 0 8px rgba(255,221,85,0.6); }
 
   #skip-hint { position: absolute; bottom: 14px; right: 20px; color: #345; font-size: 11px; letter-spacing: 2px; z-index: 12; }
-
 </style>
 </head>
 <body>
+
 <div id="menu">
   <div id="title-wrap">
     <div class="f-letter">
@@ -103,7 +105,8 @@ button:hover { background: #557a4a; color: #000; box-shadow: 0 0 25px currentCol
   <button onclick="startIntro('hard')">HARD</button>
   <button onclick="startIntro('nightmare')">NIGHTMARE</button>
 </div>
-<canvas id="scene"></canvas>
+
+<canvas id="scene" style="display:none;"></canvas>
 <div id="dialogue-box"><span class="who">JOHN</span><span id="dialogue-text"></span></div>
 <div id="skip-hint">PRESS SPACE TO SKIP LINE</div>
 
@@ -114,31 +117,39 @@ function resize() { canvas.width = window.innerWidth; canvas.height = window.inn
 window.addEventListener('resize', resize);
 resize();
 
+let diff = 'medium'; // set when the player picks a difficulty on the menu
+
+// ============================================================
+// SCRIPT — this is the only part you need to touch to add more.
+// Beat types:
+//   { type:'line', text, duration, who }   -> shows dialogue
+//   { type:'ring' }                        -> starts the phone ringing, pacing halts
+//   { type:'end' }                         -> triggers the automatic fade-to-black
+// Add new beats anywhere in this array — nothing else needs editing.
 // ============================================================
 const SCRIPT = [
-  { type:'line', text:"Another disappearance — again this week.", duration:4000, who:'JOHN' },
-  { type:'line', text:"No, it can't be related.", duration:2500, who:'JOHN' },
-  { type:'line', text:"2 years. 2 years and I still can't stop thinking about that incident.", duration:5000, who:'JOHN' },
+  { type:'line', text:"Another twelve-hour day. Great.", duration:3200, who:'JOHN' },
+  { type:'line', text:"I told myself I wasn't going to think about that place again.", duration:3800, who:'JOHN' },
+  { type:'line', text:"Three weeks. Three weeks and it's still all I think about.", duration:3600, who:'JOHN' },
   { type:'ring' },
-  { type:'line', text:"....Who's calling this late.", duration:3125, who:'JOHN' },
-  { type:'line', text:"Hello?", duration:1875, who:'JOHN' },
-  { type:'line', text:"...", duration:1250, who:'???' },
-  { type:'line', text:"Go back to the school.", duration:2500, who:'???' },
-  { type:'line', text:"What? Who is this? How did you get this number—", duration:3125, who:'JOHN' },
-  { type:'line', text:"You already know why. Go back to the school, John.", duration:3750, who:'???' },
-  { type:'line', text:"The corruption has started again.", duration:3750, who:'???' },
-  { type:'line', text:"Wha- What's the hell is this corruption thing?", duration:3437, who:'JOHN' },
-  // Corrupted-sounding line (kept as valid UTF-8 string
-  { type:'line', text:"...No n̵̢̨͉̻͙̹͚͈͖̜̺̦̾̿̈́̆̑́͋̒́̒̉ͬ͠ͅot̵̲́̄̀̀̈́͊̐̽̍̂ now. It's t̶o̶o̶ ̴e̶a̷s̴y̵.", duration:3750, who:'???' },
-  { type:'line', text:"Hello? HELLO?!", duration:3750, who:'JOHN' },
-  { type:'line', text:"...", duration: 3750, who:'JOHN' },
-  { type:'line', text:"No. No, I'm not going back there.", duration:3750, who:'JOHN' },
-  { type:'line', text:"...", duration:2000, who:'JOHN' },
-  { type:'line', text:"Corruption... Corruption", duration:3500, who:'JOHN' },
-  { type:'line', text:"I need to investigate this.", duration:3500, who:'JOHN' },
+  { type:'line', text:"...Who's calling this late.", duration:2600, who:'JOHN' },
+  { type:'line', text:"Hello?", duration:1800, who:'JOHN' },
+  { type:'line', text:"...", duration:1600, who:'???' },
+  { type:'line', text:"Go back to the school.", duration:2800, who:'???' },
+  { type:'line', text:"What? Who is this? How did you get this number—", duration:3200, who:'JOHN' },
+  { type:'line', text:"You already know why. Go back to the school, John.", duration:3600, who:'???' },
+  { type:'line', text:"There are still secrets in there.", duration:3400, who:'???' },
+  { type:'line', text:"Hello? HELLO?", duration:2400, who:'JOHN' },
+  { type:'line', text:"...", duration:1800, who:'JOHN' },
+  { type:'line', text:"No. No, I'm not going back there.", duration:3000, who:'JOHN' },
+  { type:'line', text:"...", duration:1600, who:'JOHN' },
+  { type:'line', text:"Still secrets in there.", duration:2800, who:'JOHN' },
   { type:'end' }
 ];
 
+// ============================================================
+// ENGINE — you shouldn't need to edit below this line.
+// ============================================================
 let frameCount = 0;
 let beatIdx = 0;
 let ringing = false;
@@ -153,10 +164,10 @@ let transitioned = false;
 const john = { paceMin: -160, paceMax: 160, t: 0, dir: 1, speed: 0.012, standing: false };
 
 window.addEventListener('keydown', e => {
-  if (e.code === 'Space') { e.preventDefault(); skipRequested = true; }
+  if (e.key === ' ') { e.preventDefault(); skipRequested = true; }
 });
 
-
+// ---- procedural sound (no audio files needed) ----
 let audioCtx = null;
 let ringInterval = null;
 function ensureAudio() {
@@ -181,7 +192,6 @@ function beep(freq, duration, type = 'sine', gainPeak = 0.15, startDelay = 0) {
 }
 
 function playRingBurst() {
-  // classic two-tone landline ring: 950Hz + 1400Hz together, ~1.8s on
   beep(950, 1.8, 'sine', 0.08);
   beep(1400, 1.8, 'sine', 0.06);
 }
@@ -190,11 +200,22 @@ function startRingSound() {
   ringInterval = setInterval(playRingBurst, 3800);
 }
 function stopRingSound() {
-  if (ringInterval) { clearInterval(ringInterval); ringInterval = null; }
+  clearInterval(ringInterval); ringInterval = null;
 }
 function playLineBlip() {
   beep(320 + Math.random() * 80, 0.05, 'square', 0.03);
 }
+
+// Called when a difficulty button is clicked on the menu.
+window.startIntro = function(mode) {
+  diff = mode;
+  ensureAudio();
+  document.getElementById('menu').style.display = 'none';
+  canvas.style.display = 'block';
+  resize();
+  loop();
+  setTimeout(playNextBeat, 800);
+};
 
 function playNextBeat() {
   if (beatIdx >= SCRIPT.length) return;
@@ -205,7 +226,7 @@ function playNextBeat() {
     john.standing = true;
     startRingSound();
     beatIdx++;
-    return; // waits for player to "answer" via click
+    return;
   }
 
   if (beat.type === 'end') {
@@ -250,17 +271,15 @@ canvas.addEventListener('click', () => {
 function onIntroDone() {
   // Called automatically once the fade-to-black finishes.
   // If this file has been merged into copythis.html, startGame() will already
-  // exist on window — call straight into the school level. Until then, show
-  // a placeholder so you can confirm the transition timing looks right.
+  // exist on window — call straight into the school level, carrying over the
+  // difficulty the player picked on this menu.
   if (typeof window.startGame === 'function') {
-    window.startGame('easy');
+    window.startGame(diff);
   } else {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#000;color:#00e5ff;font-size:14px;letter-spacing:2px;">[ transition to school level ]</div>';
+    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#000;color:#00e5ff;font-size:14px;letter-spacing:2px;">[ transition to school level goes here — startGame() not found, merge this into copythis.html ]</div>';
   }
 }
 
-// Top-down office layout, centered on screen. All coords are room-local
-// (origin at room center) so the room scales cleanly with window size.
 function officeRect() {
   const w = canvas.width, h = canvas.height;
   const rw = Math.min(w * 0.6, 700), rh = Math.min(h * 0.6, 500);
@@ -274,11 +293,9 @@ function drawOffice() {
   const { cx, cy, rw, rh } = officeRect();
   const left = cx - rw / 2, top = cy - rh / 2;
 
-  // floor
   ctx.fillStyle = '#14181c'; ctx.fillRect(left, top, rw, rh);
   ctx.strokeStyle = '#2a3540'; ctx.lineWidth = 4; ctx.strokeRect(left, top, rw, rh);
 
-  // window, seen from above as a bright strip along the top wall
   const winW = rw * 0.35;
   ctx.fillStyle = 'rgba(120,170,220,0.18)';
   ctx.fillRect(cx - winW / 2, top - 2, winW, 6);
@@ -288,25 +305,21 @@ function drawOffice() {
     ctx.beginPath(); ctx.moveTo(rx, top - 2); ctx.lineTo(rx, top + 4); ctx.stroke();
   }
 
-  // desk, top-down (a flat rectangle against the right wall)
   const deskW = rw * 0.22, deskH = rh * 0.32;
   const deskX = left + rw * 0.72, deskY = cy;
   ctx.fillStyle = '#1c1610'; ctx.strokeStyle = '#4a3a22'; ctx.lineWidth = 2;
   ctx.fillRect(deskX - deskW / 2, deskY - deskH / 2, deskW, deskH);
   ctx.strokeRect(deskX - deskW / 2, deskY - deskH / 2, deskW, deskH);
 
-  // chair (small circle) tucked at the desk
   ctx.fillStyle = '#241a0e'; ctx.strokeStyle = '#6b4d22'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.arc(deskX, deskY + deskH / 2 + 18, 14, 0, 7); ctx.fill(); ctx.stroke();
 
-  // lamp glow on the desk corner
   ctx.save();
   ctx.shadowBlur = 22; ctx.shadowColor = '#ffcf70';
   ctx.fillStyle = 'rgba(255,207,112,0.5)';
   ctx.beginPath(); ctx.arc(deskX - deskW / 2 + 12, deskY - deskH / 2 + 12, 6, 0, 7); ctx.fill();
   ctx.restore();
 
-  // phone on the desk
   const phoneX = deskX, phoneY = deskY;
   const ringPulse = ringing ? (Math.sin(frameCount * 0.6) * 0.5 + 0.5) : 0;
   ctx.save();
@@ -323,7 +336,6 @@ function drawOffice() {
     ctx.textAlign = 'left';
   }
 
-  // bookshelf against the left wall, top-down
   ctx.fillStyle = '#1a1408'; ctx.strokeStyle = '#6b4d22'; ctx.lineWidth = 2;
   ctx.fillRect(left + 14, cy - rh * 0.25, 20, rh * 0.5);
   ctx.strokeRect(left + 14, cy - rh * 0.25, 20, rh * 0.5);
@@ -347,8 +359,6 @@ function drawJohn() {
     jy = top + rh * 0.6;
   }
 
-  // simple 2D top-down marker: a plain glowing dot, no face — same visual
-  // language as the player marker in the main game.
   ctx.save();
   ctx.shadowBlur = 15; ctx.shadowColor = '#00e5ff';
   ctx.fillStyle = '#eafffe';
@@ -372,15 +382,12 @@ function loop() {
     if (fadeAlpha >= 1 && !transitioned) {
       transitioned = true;
       onIntroDone();
-      return; // stop the loop once we've handed off
+      return;
     }
   }
 
   requestAnimationFrame(loop);
 }
-
-loop();
-setTimeout(playNextBeat, 800);
 </script>
 </body>
 </html>
