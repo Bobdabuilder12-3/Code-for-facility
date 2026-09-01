@@ -5,6 +5,57 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Central City Merit High | Chapter 2 - The Call</title>
 <style>
+ /* ============== MENU ============== */
+#menu { position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: radial-gradient(ellipse at center, #0a0d0a 0%, #000 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+
+#menu::before {
+  content: ""; position: absolute; inset: 0; opacity: 0.05; pointer-events: none;
+  background-image: repeating-linear-gradient(0deg, #4a6, 0px, transparent 1px, transparent 40px), repeating-linear-gradient(90deg, #4a6, 0px, transparent 1px, transparent 40px);
+  animation: gridDrift 14s linear infinite;
+}
+@keyframes gridDrift { from { background-position: 0 0, 0 0; } to { background-position: 0 400px, 400px 0; } }
+
+#title-wrap { position: relative; display: flex; align-items: flex-start; margin-bottom: 6px; }
+
+#title-rest { font-size: 64px; font-weight: bold; letter-spacing: 4px; color: #8a7a5a;
+  text-shadow: 0 0 18px rgba(120,90,40,0.5), 3px 3px #000;
+  filter: saturate(0.7); }
+
+.f-letter { position: relative; width: 46px; height: 82px; margin-right: 2px; margin-top: 4px; }
+.f-stem { position: absolute; left: 4px; top: 0; width: 14px; height: 82px; background: #8a7a5a;
+  box-shadow: 0 0 18px rgba(120,90,40,0.5); border: 2px solid #4a3a20; }
+.f-bar-mid { position: absolute; left: 4px; top: 34px; width: 30px; height: 13px; background: #8a7a5a;
+  border: 2px solid #4a3a20; box-shadow: 0 0 14px rgba(120,90,40,0.4); }
+.f-bar-top { position: absolute; left: 4px; top: 0; width: 40px; height: 13px; background: #8a7a5a;
+  border: 2px solid #4a3a20; box-shadow: 0 0 14px rgba(120,90,40,0.4);
+  transform-origin: 6px 6px;
+  animation: swing 3.4s ease-in-out infinite; }
+@keyframes swing {
+  0%   { transform: rotate(-14deg); }
+  50%  { transform: rotate(9deg); }
+  100% { transform: rotate(-14deg); }
+}
+
+.moss-overlay { position: absolute; inset: -20px -30px; pointer-events: none; mix-blend-mode: multiply;
+  background:
+    radial-gradient(ellipse 40px 22px at 8% 90%, rgba(60,110,50,0.65), transparent 70%),
+    radial-gradient(ellipse 30px 18px at 22% 10%, rgba(70,120,55,0.55), transparent 70%),
+    radial-gradient(ellipse 50px 26px at 55% 95%, rgba(55,100,45,0.6), transparent 70%),
+    radial-gradient(ellipse 35px 20px at 78% 15%, rgba(65,115,50,0.5), transparent 70%),
+    radial-gradient(ellipse 45px 24px at 95% 80%, rgba(60,105,48,0.55), transparent 70%); }
+
+.vine { position: absolute; top: -18px; pointer-events: none; opacity: 0.9; }
+.vine.left { left: -34px; }
+.vine.right { right: -34px; transform: scaleX(-1); }
+
+#subtitle { color: #56704a; margin-bottom: 4px; letter-spacing: 3px; font-size: 13px; text-transform: uppercase; }
+#tagline { color: #4a5a44; margin-bottom: 26px; letter-spacing: 1px; font-size: 13px; text-align: center; max-width: 480px; }
+
+button { padding: 15px 40px; background: rgba(0,0,0,0.4); border: 2px solid #557a4a; color: #7fae6a; cursor: pointer;
+  font-weight: bold; margin: 10px; width: 240px; letter-spacing: 3px; transition: 0.25s; position: relative; font-family: inherit; }
+button:hover { background: #557a4a; color: #000; box-shadow: 0 0 25px currentColor; transform: scale(1.04); }>
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; }
   canvas { display: block; width: 100vw; height: 100vh; }
@@ -21,7 +72,37 @@
 </style>
 </head>
 <body>
-
+<div id="menu">
+  <div id="title-wrap">
+    <div class="f-letter">
+      <div class="f-stem"></div>
+      <div class="f-bar-mid"></div>
+      <div class="f-bar-top"></div>
+    </div>
+    <div id="title-rest">ACILITY</div>
+    <div class="moss-overlay"></div>
+    <svg class="vine left" width="70" height="140" viewBox="0 0 70 140">
+      <path d="M60,0 C30,20 50,45 25,60 C5,72 30,95 15,115 C5,125 20,132 10,140" fill="none" stroke="#3f6a37" stroke-width="3" opacity="0.85"/>
+      <circle cx="28" cy="22" r="5" fill="#4f8a44"/>
+      <circle cx="18" cy="58" r="4" fill="#4f8a44"/>
+      <circle cx="30" cy="90" r="5" fill="#4f8a44"/>
+      <circle cx="12" cy="120" r="4" fill="#4f8a44"/>
+    </svg>
+    <svg class="vine right" width="70" height="140" viewBox="0 0 70 140">
+      <path d="M60,0 C30,20 50,45 25,60 C5,72 30,95 15,115 C5,125 20,132 10,140" fill="none" stroke="#3f6a37" stroke-width="3" opacity="0.85"/>
+      <circle cx="28" cy="22" r="5" fill="#4f8a44"/>
+      <circle cx="18" cy="58" r="4" fill="#4f8a44"/>
+      <circle cx="30" cy="90" r="5" fill="#4f8a44"/>
+      <circle cx="12" cy="120" r="4" fill="#4f8a44"/>
+    </svg>
+  </div>
+  <p id="subtitle">Chapter 2</p>
+  <p id="tagline">John swore he'd never go back. The call didn't give him a choice.</p>
+  <button onclick="startIntro('easy')">EASY</button>
+  <button onclick="startIntro('medium')">MEDIUM</button>
+  <button onclick="startIntro('hard')">HARD</button>
+  <button onclick="startIntro('nightmare')">NIGHTMARE</button>
+</div>
 <canvas id="scene"></canvas>
 <div id="dialogue-box"><span class="who">JOHN</span><span id="dialogue-text"></span></div>
 <div id="skip-hint">PRESS SPACE TO SKIP LINE</div>
