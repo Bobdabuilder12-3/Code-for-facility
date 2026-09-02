@@ -99,7 +99,7 @@
     </svg>
   </div>
   <p id="subtitle">Chapter 2</p>
-  <p id="tagline">John swore he'd never go back. The call didn't give him a choice.</p>
+  <p id="tagline">???</p>
   <button onclick="startIntro('easy')">EASY</button>
   <button onclick="startIntro('medium')">MEDIUM</button>
   <button onclick="startIntro('hard')">HARD</button>
@@ -119,13 +119,6 @@ resize();
 
 let diff = 'medium'; // set when the player picks a difficulty on the menu
 
-// ============================================================
-// SCRIPT — this is the only part you need to touch to add more.
-// Beat types:
-//   { type:'line', text, duration, who }   -> shows dialogue
-//   { type:'ring' }                        -> starts the phone ringing, pacing halts
-//   { type:'end' }                         -> triggers the automatic fade-to-black
-// Add new beats anywhere in this array — nothing else needs editing.
 // ============================================================
 const SCRIPT = [
   { type:'line', text:"Another twelve-hour day. Great.", duration:3200, who:'JOHN' },
@@ -148,7 +141,6 @@ const SCRIPT = [
 ];
 
 // ============================================================
-// ENGINE — you shouldn't need to edit below this line.
 // ============================================================
 let frameCount = 0;
 let beatIdx = 0;
@@ -167,7 +159,6 @@ window.addEventListener('keydown', e => {
   if (e.key === ' ') { e.preventDefault(); skipRequested = true; }
 });
 
-// ---- procedural sound (no audio files needed) ----
 let audioCtx = null;
 let ringInterval = null;
 function ensureAudio() {
@@ -230,12 +221,12 @@ function playNextBeat() {
   }
 
   if (beat.type === 'end') {
-    fading = true; // triggers the automatic fade-to-black in loop()
+    fading = true;
     beatIdx++;
     return;
   }
 
-  // type === 'line'
+
   const box = document.getElementById('dialogue-box');
   const txt = document.getElementById('dialogue-text');
   const whoEl = box.querySelector('.who');
@@ -270,9 +261,6 @@ canvas.addEventListener('click', () => {
 
 function onIntroDone() {
   // Called automatically once the fade-to-black finishes.
-  // If this file has been merged into copythis.html, startGame() will already
-  // exist on window — call straight into the school level, carrying over the
-  // difficulty the player picked on this menu.
   if (typeof window.startGame === 'function') {
     window.startGame(diff);
   } else {
