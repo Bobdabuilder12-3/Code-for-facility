@@ -69,7 +69,20 @@
   #dialogue-box.show { opacity: 1; }
   #dialogue-box .who { color: #ffdd55; font-size: 11px; letter-spacing: 3px; margin-bottom: 6px; display: block; text-shadow: 0 0 8px rgba(255,221,85,0.6); }
 
-  #skip-hint { position: absolute; bottom: 14px; right: 20px; color: #345; font-size: 11px; letter-spacing: 2px; z-index: 12; }
+  /* corrupted/fragmented line effect — used for the ??? line that should look broken up */
+  #dialogue-box.glitch .who { color: #ff3355; text-shadow: 0 0 8px rgba(255,51,85,0.7); }
+  #dialogue-box.glitch #dialogue-text { animation: glitchJitter 0.15s infinite; display: inline-block; }
+  @keyframes glitchJitter {
+    0%   { text-shadow: 2px 0 #ff2b4d, -2px 0 #2bdcff; transform: translate(0,0) skewX(0deg); }
+    25%  { text-shadow: -2px 0 #ff2b4d, 2px 0 #2bdcff; transform: translate(-1px,0) skewX(2deg); }
+    50%  { text-shadow: 2px 1px #ff2b4d, -2px -1px #2bdcff; transform: translate(1px,0) skewX(-2deg); }
+    75%  { text-shadow: -1px -1px #ff2b4d, 1px 1px #2bdcff; transform: translate(0,1px) skewX(1deg); }
+    100% { text-shadow: 2px 0 #ff2b4d, -2px 0 #2bdcff; transform: translate(0,0) skewX(0deg); }
+  }
+
+  #skip-hint { position: absolute; bottom: 14px; right: 20px; color: #345; font-size: 11px; letter-spacing: 2px; z-index: 12; animation: hintFlash 2.4s ease-in-out infinite; }
+  @keyframes hintFlash { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+  #move-hint { position: absolute; bottom: 14px; left: 20px; color: #345; font-size: 11px; letter-spacing: 2px; z-index: 12; display: none; }
 </style>
 </head>
 <body>
@@ -99,7 +112,7 @@
     </svg>
   </div>
   <p id="subtitle">Chapter 2</p>
-  <p id="tagline">???</p>
+  <p id="tagline">John swore he'd never go back. The call didn't give him a choice.</p>
   <button onclick="startIntro('easy')">EASY</button>
   <button onclick="startIntro('medium')">MEDIUM</button>
   <button onclick="startIntro('hard')">HARD</button>
@@ -108,7 +121,8 @@
 
 <canvas id="scene" style="display:none;"></canvas>
 <div id="dialogue-box"><span class="who">JOHN</span><span id="dialogue-text"></span></div>
-<div id="skip-hint">PRESS SPACE TO SKIP LINE</div>
+<div id="skip-hint">PRESS SPACE TO CONTINUE</div>
+<div id="move-hint">WASD / ARROW KEYS TO MOVE</div>
 
 <script>
 const canvas = document.getElementById('scene');
@@ -118,41 +132,47 @@ window.addEventListener('resize', resize);
 resize();
 
 let diff = 'medium'; // set when the player picks a difficulty on the menu
+let sceneMode = 'office'; // 'office' -> 'grounds' -> handed off to the main game
 
+// ============================================================
+// SCRIPT — this is the only part you need to touch to add more.
+// Beat types:
+//   { type:'line', text, duration, who }   -> shows dialogue
+//   { type:'ring' }                        -> starts the phone ringing, pacing halts
+//   { type:'end' }                         -> fades out of the office and into the school grounds
+// Add new beats anywhere in this array — nothing else needs editing.
 // ============================================================
 const SCRIPT = [
   { type:'line', text:"Another twelve-hour day. Great.", duration:3200, who:'JOHN' },
-  { type:'line', text:"...", duration:3800, who:'JOHN' },
   { type:'line', text:"I told myself I wasn't going to think about that place again.", duration:3800, who:'JOHN' },
-  { type:'line', text:"2 Years. 2 years and it's still all I think about.", duration:3800, who:'JOHN' },
+  { type:'line', text:"Two years. Two years and it's still all I think about.", duration:3600, who:'JOHN' },
   { type:'ring' },
-  { type:'line', text:"...Who's calling this late.", duration:3800, who:'JOHN' },
-  { type:'line', text:"Hello?", duration:3800, who:'JOHN' },
-  { type:'line', text:"...", duration:3800, who:'???' },
-  { type:'line', text:"Go back to the school.", duration:3800, who:'???' },
-  { type:'line', text:"What? Who is this? How did you get this number—", duration:3800, who:'JOHN' },
-  { type:'line', text:"You already know why. Go back to the school, John.", duration:3800, who:'???' },
-  { type:'line', text:"There are still secrets in there.", duration:3400, who:'???' },
-  { type:'line', text:"Hello? HELLO?", duration:3400, who:'JOHN' },
-  { type:'line', text:"...", duration:3800, who:'JOHN' },
-  { type:'line', text:"No. No, I'm not going back there.", duration:3800, who:'JOHN' },
-  { type:'line', text:"...", duration:3800, who:'JOHN' },
-  { type:'line', text:"Still secrets in there.", duration:3800, who:'JOHN' },
+  { type:'line', text:"...Who's calling this late.", duration:2600, who:'JOHN' },
+  { type:'line', text:"Hello?", duration:1800, who:'JOHN' },
+  { type:'line', text:"...", duration:1800, who:'???' },
+  { type:'line', text:"You still dream about the halls, don't you, John.", duration:3800, who:'???' },
+  { type:'line', text:"What? Who is this? How did you get this number—", duration:3200, who:'JOHN' },
+  { type:'line', text:"Go back to the school.", duration:2800, who:'???' },
+  { type:'line', text:"There are still secrets to be found.", duration:3400, who:'???' },
+  { type:'line', text:"What do you mean, secrets? What's still in there?", duration:3400, who:'JOHN' },
+  { type:'line', text:"It will be too easy.", duration:3600, who:'???', corrupted:true },
+  { type:'line', text:"Hello? HELLO?", duration:2400, who:'JOHN' },
+  { type:'line', text:"...", duration:1800, who:'JOHN' },
+  { type:'line', text:"No. No, I'm not going back there.", duration:3000, who:'JOHN' },
+  { type:'line', text:"...", duration:1600, who:'JOHN' },
+  { type:'line', text:"Still secrets to be found.", duration:2800, who:'JOHN' },
   { type:'end' }
 ];
 
 // ============================================================
+// ENGINE — you shouldn't need to edit below this line.
 // ============================================================
 let frameCount = 0;
 let beatIdx = 0;
 let ringing = false;
-let ringPhase = 0;
 let phoneAnswered = false;
 let skipRequested = false;
 let dialogueTimer = null;
-let fading = false;
-let fadeAlpha = 0;
-let transitioned = false;
 
 const john = { paceMin: -160, paceMax: 160, t: 0, dir: 1, speed: 0.012, standing: false };
 
@@ -160,6 +180,7 @@ window.addEventListener('keydown', e => {
   if (e.key === ' ') { e.preventDefault(); skipRequested = true; }
 });
 
+// ---- procedural sound (no audio files needed) ----
 let audioCtx = null;
 let ringInterval = null;
 function ensureAudio() {
@@ -198,12 +219,30 @@ function playLineBlip() {
   beep(320 + Math.random() * 80, 0.05, 'square', 0.03);
 }
 
+// ---- corrupted/fragmented text, used for the ??? line marked corrupted:true ----
+const GLITCH_CHARS = '#%&¦/\\|~^*×÷§¶‡†░▓▒';
+function glitchify(str, intensity = 0.22) {
+  return str.split('').map(ch => {
+    if (ch === ' ') return ch;
+    return Math.random() < intensity ? GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)] : ch;
+  }).join('');
+}
+let glitchInterval = null;
+
+// ---- generic fade-to-black used for every scene transition ----
+let fadeDir = 0;   // 0 idle, 1 fading to black, -1 fading in from black
+let fadeAlpha = 0;
+let fadeCallback = null;
+function fadeOut(callback) { fadeDir = 1; fadeCallback = callback; }
+function fadeIn() { fadeDir = -1; }
+
 // Called when a difficulty button is clicked on the menu.
 window.startIntro = function(mode) {
   diff = mode;
   ensureAudio();
   document.getElementById('menu').style.display = 'none';
   canvas.style.display = 'block';
+  sceneMode = 'office';
   resize();
   loop();
   setTimeout(playNextBeat, 800);
@@ -222,23 +261,39 @@ function playNextBeat() {
   }
 
   if (beat.type === 'end') {
-    fading = true;
     beatIdx++;
+    fadeOut(() => {
+      document.getElementById('skip-hint').style.display = 'none';
+      document.getElementById('move-hint').style.display = 'block';
+      sceneMode = 'grounds';
+      buildGrounds();
+      fadeIn();
+    });
     return;
   }
 
-
+  // type === 'line'
   const box = document.getElementById('dialogue-box');
   const txt = document.getElementById('dialogue-text');
   const whoEl = box.querySelector('.who');
-  txt.textContent = beat.text;
   whoEl.textContent = beat.who || 'JOHN';
+  clearInterval(glitchInterval); glitchInterval = null;
+  box.classList.remove('glitch');
+  if (beat.corrupted) {
+    box.classList.add('glitch');
+    txt.textContent = glitchify(beat.text);
+    glitchInterval = setInterval(() => { txt.textContent = glitchify(beat.text); }, 90);
+  } else {
+    txt.textContent = beat.text;
+  }
   playLineBlip();
   box.classList.add('show');
   clearTimeout(dialogueTimer);
   skipRequested = false;
 
   const advance = () => {
+    clearInterval(glitchInterval); glitchInterval = null;
+    box.classList.remove('glitch');
     box.classList.remove('show');
     setTimeout(() => { beatIdx++; playNextBeat(); }, 350);
   };
@@ -248,11 +303,10 @@ function playNextBeat() {
     else dialogueTimer = setTimeout(checkSkip, 50);
   };
   dialogueTimer = setTimeout(checkSkip, 50);
-  setTimeout(() => { if (!skipRequested) advance(); }, beat.duration);
 }
 
 canvas.addEventListener('click', () => {
-  if (ringing && !phoneAnswered) {
+  if (sceneMode === 'office' && ringing && !phoneAnswered) {
     phoneAnswered = true;
     ringing = false;
     stopRingSound();
@@ -260,15 +314,9 @@ canvas.addEventListener('click', () => {
   }
 });
 
-function onIntroDone() {
-  // Called automatically once the fade-to-black finishes.
-  if (typeof window.startGame === 'function') {
-    window.startGame(diff);
-  } else {
-    document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#000;color:#00e5ff;font-size:14px;letter-spacing:2px;">[ transition to school level goes here — startGame() not found, merge this into copythis.html ]</div>';
-  }
-}
-
+// ============================================================
+// OFFICE SCENE
+// ============================================================
 function officeRect() {
   const w = canvas.width, h = canvas.height;
   const rw = Math.min(w * 0.6, 700), rh = Math.min(h * 0.6, 500);
@@ -330,7 +378,7 @@ function drawOffice() {
   ctx.strokeRect(left + 14, cy - rh * 0.25, 20, rh * 0.5);
 }
 
-function drawJohn() {
+function drawJohnOffice() {
   const { cx, cy, rw, rh } = officeRect();
   const left = cx - rw / 2, top = cy - rh / 2;
   const pacePad = 90;
@@ -359,19 +407,357 @@ function drawJohn() {
   ctx.textAlign = 'left';
 }
 
+// ============================================================
+// SCHOOL GROUNDS SCENE
+// Matches the original game's exact wall style (thin blue-grey stroked
+// line segments with a dark glow, dark interior floor colour, and the
+// same locked-door look), a much smaller yard footprint closer to the
+// original's scale, plus chapter-2-specific decay (moss, vines, graffiti).
+// The building is a solid, non-enterable block — walking up to the door
+// just triggers enterBuilding(), which is where a real cutscene hooks in.
+// ============================================================
+const GROUND_W = 1800, GROUND_H = 1000;
+const building = { x: GROUND_W/2 - 380, y: 90, w: 760, h: 300 };
+const doorGap = { cx: GROUND_W/2, halfW: 40 };
+const doorTrigger = { x: GROUND_W/2, y: building.y + building.h + 24, r: 40 };
+const ROAD_Y = GROUND_H - 70; // road strip along the bottom edge, behind the player's spawn
+
+const gPlayer = { x: GROUND_W/2, y: GROUND_H - 110, r: 11, speed: 3.2, facing: 0 };
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; });
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+
+let trees = [], bushes = [], grassTufts = [], graffiti = [], fencePosts = [];
+let enteringBuilding = false;
+let car = null;
+
+function seededRand(seed) {
+  const x = Math.sin(seed * 12.9898) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function buildGrounds() {
+  trees = []; bushes = []; grassTufts = []; graffiti = []; fencePosts = [];
+  gPlayer.x = GROUND_W / 2; gPlayer.y = GROUND_H - 110;
+  enteringBuilding = false;
+
+  // greenery scattered across the (now much smaller) yard, avoiding the building footprint
+  let i = 0, placed = 0;
+  while (placed < 34) {
+    i++;
+    const x = seededRand(i * 3.1) * (GROUND_W - 100) + 50;
+    const y = seededRand(i * 7.7) * (ROAD_Y - building.y - building.h - 60) + building.y + building.h + 40;
+    const inBuilding = x > building.x - 40 && x < building.x + building.w + 40 && y < building.y + building.h + 40;
+    if (inBuilding) continue;
+    if (seededRand(i * 5.3) > 0.45) trees.push({ x, y, r: 22 + seededRand(i*1.7) * 12 });
+    else bushes.push({ x, y, r: 14 + seededRand(i*2.3) * 8 });
+    placed++;
+  }
+  for (let g = 0; g < 130; g++) {
+    grassTufts.push({
+      x: seededRand(g * 9.1) * GROUND_W,
+      y: seededRand(g * 4.4) * ROAD_Y,
+      h: 5 + seededRand(g * 6.6) * 8,
+      lean: (seededRand(g * 2.2) - 0.5) * 0.8
+    });
+  }
+
+  // graffiti tags scattered along the building's outer walls
+  const colors = ['#ff4d8a', '#4dd0ff', '#ffcf40', '#7fff6b', '#c04dff'];
+  const wallSpots = [
+    { x: building.x + 60, y: building.y + 50 }, { x: building.x + 180, y: building.y + 100 },
+    { x: building.x + building.w - 90, y: building.y + 60 }, { x: building.x + 110, y: building.y + building.h - 55 },
+    { x: building.x + building.w - 150, y: building.y + building.h - 70 }
+  ];
+  wallSpots.forEach((s, idx) => {
+    graffiti.push({ x: s.x, y: s.y, color: colors[idx % colors.length], seed: idx * 31 + 7, size: 44 + (idx % 3) * 14 });
+  });
+
+  // perimeter fence
+  for (let x = 20; x < GROUND_W; x += 130) {
+    fencePosts.push({ x, y: building.y - 20 });
+  }
+  for (let y = building.y; y < ROAD_Y; y += 130) {
+    fencePosts.push({ x: 16, y });
+    fencePosts.push({ x: GROUND_W - 16, y });
+  }
+
+  // the car that dropped John off starts parked on the road, right behind him
+  car = { x: GROUND_W / 2 - 70, y: ROAD_Y, vx: 0, angle: 0 };
+}
+
+function resolveCircleCollision(x, y, r, cx, cy, cr) {
+  const dx = x - cx, dy = y - cy;
+  const dist = Math.hypot(dx, dy);
+  const minDist = r + cr;
+  if (dist < minDist) {
+    if (dist < 0.001) return { x: x + minDist, y };
+    const nx = dx / dist, ny = dy / dist;
+    return { x: cx + nx * minDist, y: cy + ny * minDist };
+  }
+  return { x, y };
+}
+
+function resolveBuildingCollision(x, y, r) {
+  const bx1 = building.x, by1 = building.y, bx2 = building.x + building.w, by2 = building.y + building.h;
+  const cx = Math.max(bx1, Math.min(x, bx2));
+  const cy = Math.max(by1, Math.min(y, by2));
+  const dx = x - cx, dy = y - cy;
+  const dist = Math.hypot(dx, dy);
+  if (dist < r) {
+    if (dist < 0.001) return { x, y: by2 + r + 1 };
+    const nx = dx / dist, ny = dy / dist;
+    return { x: cx + nx * r, y: cy + ny * r };
+  }
+  return { x, y };
+}
+
+function updateCar() {
+  if (!car) return;
+  car.vx = Math.min(car.vx + 0.08, 6.5); // pulls away, accelerating
+  car.x += car.vx;
+  if (car.x - 40 > GROUND_W) car = null; // gone, off-screen
+}
+
+function updateGrounds() {
+  updateCar();
+  if (enteringBuilding) return;
+
+  let dx = 0, dy = 0;
+  if (keys['w'] || keys['arrowup']) dy -= 1;
+  if (keys['s'] || keys['arrowdown']) dy += 1;
+  if (keys['a'] || keys['arrowleft']) dx -= 1;
+  if (keys['d'] || keys['arrowright']) dx += 1;
+  if (dx || dy) {
+    const len = Math.hypot(dx, dy);
+    dx /= len; dy /= len;
+    gPlayer.facing = Math.atan2(dy, dx);
+    let nx = gPlayer.x + dx * gPlayer.speed;
+    let ny = gPlayer.y + dy * gPlayer.speed;
+    nx = Math.max(gPlayer.r, Math.min(GROUND_W - gPlayer.r, nx));
+    ny = Math.max(gPlayer.r, Math.min(GROUND_H - gPlayer.r, ny));
+    let resolved = resolveBuildingCollision(nx, ny, gPlayer.r);
+    trees.forEach(t => { resolved = resolveCircleCollision(resolved.x, resolved.y, gPlayer.r, t.x, t.y, t.r); });
+    bushes.forEach(b => { resolved = resolveCircleCollision(resolved.x, resolved.y, gPlayer.r, b.x, b.y, b.r); });
+    gPlayer.x = resolved.x; gPlayer.y = resolved.y;
+  }
+
+  const distToDoor = Math.hypot(gPlayer.x - doorTrigger.x, gPlayer.y - doorTrigger.y);
+  if (distToDoor < doorTrigger.r) {
+    enteringBuilding = true;
+    fadeOut(() => enterBuilding());
+  }
+}
+
+function clampCam(pos, mapSize, viewSize) {
+  if (mapSize <= viewSize) return -(mapSize - viewSize) / 2;
+  return Math.max(0, Math.min(pos - viewSize / 2, mapSize - viewSize));
+}
+
+// trees are drawn as a plain canopy circle only — top-down, no trunk
+function drawTree(x, y, r) {
+  ctx.save();
+  ctx.shadowBlur = 8; ctx.shadowColor = '#173a17';
+  ctx.fillStyle = '#20401f';
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = 'rgba(60,110,55,0.6)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.restore();
+}
+function drawBush(x, y, r) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(35,70,35,0.85)'; ctx.strokeStyle = 'rgba(70,120,70,0.5)'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
+function drawGrassTuft(t) {
+  ctx.save(); ctx.translate(t.x, t.y);
+  ctx.strokeStyle = 'rgba(70,130,60,0.55)'; ctx.lineWidth = 1.5;
+  for (let b = -1; b <= 1; b++) {
+    ctx.beginPath(); ctx.moveTo(b * 3, 0); ctx.lineTo(b * 3 + t.lean * 6, -t.h); ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawGraffiti(g) {
+  ctx.save(); ctx.translate(g.x, g.y);
+  ctx.globalAlpha = 0.75;
+  ctx.strokeStyle = g.color; ctx.lineWidth = 3; ctx.lineCap = 'round';
+  ctx.shadowBlur = 6; ctx.shadowColor = g.color;
+  let px = -g.size / 2, py = 0;
+  ctx.beginPath(); ctx.moveTo(px, py);
+  for (let k = 1; k <= 5; k++) {
+    px = -g.size / 2 + (g.size / 5) * k;
+    py = (seededRand(g.seed + k) - 0.5) * g.size * 0.5;
+    ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath(); ctx.arc(g.size * 0.3, g.size * 0.15, 4, 0, 7); ctx.fill();
+  ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+// road + the car driving away, laid down first so everything else sits on top
+function drawRoad() {
+  ctx.fillStyle = '#17171a'; ctx.fillRect(0, ROAD_Y - 6, GROUND_W, GROUND_H - (ROAD_Y - 6));
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)'; ctx.lineWidth = 3; ctx.setLineDash([26, 22]);
+  ctx.beginPath(); ctx.moveTo(0, ROAD_Y + (GROUND_H - ROAD_Y) / 2); ctx.lineTo(GROUND_W, ROAD_Y + (GROUND_H - ROAD_Y) / 2); ctx.stroke();
+  ctx.setLineDash([]);
+}
+function drawCar() {
+  if (!car) return;
+  ctx.save();
+  ctx.translate(car.x, car.y);
+  ctx.fillStyle = '#5a1f1f'; ctx.strokeStyle = '#241010'; ctx.lineWidth = 2;
+  ctx.fillRect(-32, -15, 64, 30); ctx.strokeRect(-32, -15, 64, 30);
+  ctx.fillStyle = 'rgba(10,15,20,0.85)';
+  ctx.fillRect(-14, -12, 26, 24);
+  ctx.fillStyle = '#111'; ctx.fillRect(-30, -18, 12, 5); ctx.fillRect(-30, 13, 12, 5);
+  ctx.fillRect(18, -18, 12, 5); ctx.fillRect(18, 13, 12, 5);
+  ctx.save();
+  ctx.shadowBlur = 12; ctx.shadowColor = '#ffe680';
+  ctx.fillStyle = 'rgba(255,230,128,0.85)';
+  ctx.beginPath(); ctx.arc(32, -8, 3, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(32, 8, 3, 0, 7); ctx.fill();
+  ctx.restore();
+  ctx.restore();
+}
+
+function drawBuilding() {
+  ctx.save();
+  // dark interior floor tone, exactly matching the original game's map background
+  ctx.fillStyle = '#0a0a0c';
+  ctx.fillRect(building.x, building.y, building.w, building.h);
+
+  // outer walls drawn exactly like the original — thin blue-grey line segments with a soft dark glow
+  ctx.strokeStyle = '#3a4a55'; ctx.lineWidth = 5;
+  ctx.shadowBlur = 6; ctx.shadowColor = '#122';
+  ctx.strokeRect(building.x, building.y, building.w, building.h);
+  ctx.shadowBlur = 0;
+
+  // broken/boarded windows
+  for (let wx = building.x + 50; wx < building.x + building.w - 50; wx += 110) {
+    ctx.fillStyle = 'rgba(10,15,12,0.9)'; ctx.strokeStyle = '#40352a'; ctx.lineWidth = 2;
+    ctx.fillRect(wx, building.y + 30, 48, 32); ctx.strokeRect(wx, building.y + 30, 48, 32);
+    if (seededRand(wx) > 0.5) {
+      ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.beginPath();
+      ctx.moveTo(wx + 4, building.y + 32); ctx.lineTo(wx + 40, building.y + 60);
+      ctx.moveTo(wx + 44, building.y + 32); ctx.lineTo(wx + 6, building.y + 62); ctx.stroke();
+    }
+  }
+
+  // moss creeping up from the ground line, same colour family as the original's foliage
+  ctx.globalCompositeOperation = 'multiply';
+  const mossGrad1 = ctx.createRadialGradient(building.x + 30, building.y + building.h, 4, building.x + 30, building.y + building.h, 70);
+  mossGrad1.addColorStop(0, 'rgba(60,120,55,0.85)'); mossGrad1.addColorStop(1, 'rgba(60,120,55,0)');
+  ctx.fillStyle = mossGrad1; ctx.beginPath(); ctx.arc(building.x + 30, building.y + building.h, 70, 0, 7); ctx.fill();
+  const mossGrad2 = ctx.createRadialGradient(building.x + building.w - 25, building.y + building.h, 4, building.x + building.w - 25, building.y + building.h, 85);
+  mossGrad2.addColorStop(0, 'rgba(55,110,50,0.85)'); mossGrad2.addColorStop(1, 'rgba(55,110,50,0)');
+  ctx.fillStyle = mossGrad2; ctx.beginPath(); ctx.arc(building.x + building.w - 25, building.y + building.h, 85, 0, 7); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over';
+
+  // a couple of vine strands climbing the front wall
+  ctx.strokeStyle = '#3f6a37'; ctx.lineWidth = 2;
+  [building.x + 100, building.x + building.w - 130].forEach(vx => {
+    ctx.beginPath(); ctx.moveTo(vx, building.y + building.h);
+    ctx.bezierCurveTo(vx + 8, building.y + building.h - 30, vx - 6, building.y + building.h - 60, vx + 5, building.y + building.h - 100);
+    ctx.stroke();
+    for (let leaf = 0; leaf < 2; leaf++) {
+      ctx.fillStyle = '#4f8a44';
+      ctx.beginPath(); ctx.arc(vx + (leaf % 2 ? 7 : -7), building.y + building.h - 25 - leaf * 32, 3.5, 0, 7); ctx.fill();
+    }
+  });
+
+  graffiti.forEach(drawGraffiti);
+
+  // locked entrance door, styled exactly like the original game's locked door
+  const dw = doorGap.halfW * 2, dcx = doorGap.cx;
+  ctx.save();
+  ctx.translate(dcx, building.y + building.h);
+  ctx.fillStyle = '#4a1616'; ctx.shadowBlur = 14; ctx.shadowColor = '#a00';
+  ctx.fillRect(-dw/2, -14, dw, 28);
+  ctx.strokeStyle = 'rgba(255,70,70,0.55)'; ctx.lineWidth = 3;
+  ctx.strokeRect(-dw/2, -14, dw, 28);
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  for (let rx = -dw/2 + 10; rx < dw/2 - 6; rx += 18) {
+    ctx.beginPath(); ctx.arc(rx, -6, 2, 0, 7); ctx.fill();
+    ctx.beginPath(); ctx.arc(rx, 6, 2, 0, 7); ctx.fill();
+  }
+  ctx.restore();
+
+  ctx.restore();
+}
+
+function drawGroundsPlayer() {
+  ctx.save();
+  ctx.shadowBlur = 15; ctx.shadowColor = '#00e5ff';
+  ctx.fillStyle = '#eafffe';
+  ctx.beginPath(); ctx.arc(gPlayer.x, gPlayer.y, gPlayer.r, 0, 7); ctx.fill();
+  ctx.restore();
+  ctx.font = 'bold 12px Courier New'; ctx.textAlign = 'center';
+  ctx.fillStyle = '#8fd'; ctx.fillText('JOHN', gPlayer.x, gPlayer.y - 20);
+  ctx.textAlign = 'left';
+}
+
+function drawGrounds() {
+  const w = canvas.width, h = canvas.height;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, w, h);
+
+  const camX = clampCam(gPlayer.x, GROUND_W, w);
+  const camY = clampCam(gPlayer.y, GROUND_H, h);
+
+  ctx.save();
+  ctx.translate(-camX, -camY);
+
+  ctx.fillStyle = '#101c10'; ctx.fillRect(0, 0, GROUND_W, GROUND_H);
+  drawRoad();
+  ctx.strokeStyle = '#2a3a26'; ctx.lineWidth = 6; ctx.strokeRect(0, 0, GROUND_W, GROUND_H);
+
+  fencePosts.forEach(f => {
+    ctx.fillStyle = 'rgba(90,90,100,0.4)'; ctx.fillRect(f.x - 3, f.y - 12, 6, 24);
+  });
+  grassTufts.forEach(drawGrassTuft);
+  bushes.forEach(b => drawBush(b.x, b.y, b.r));
+  trees.forEach(t => drawTree(t.x, t.y, t.r));
+
+  drawBuilding();
+  drawCar();
+  drawGroundsPlayer();
+
+  ctx.restore();
+}
+
+function enterBuilding() {
+  // Where the cutscene for walking through the door hooks in.
+  document.getElementById('move-hint').style.display = 'none';
+  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;background:#000;color:#00e5ff;font-size:14px;letter-spacing:2px;">[ entrance cutscene goes here ]</div>';
+}
+
+// ============================================================
+// MAIN LOOP
+// ============================================================
 function loop() {
   frameCount++;
-  drawOffice();
-  drawJohn();
 
-  if (fading) {
-    fadeAlpha = Math.min(1, fadeAlpha + 0.015);
+  if (sceneMode === 'office') {
+    drawOffice();
+    drawJohnOffice();
+  } else if (sceneMode === 'grounds') {
+    updateGrounds();
+    drawGrounds();
+  }
+
+  if (fadeDir !== 0) {
+    fadeAlpha = Math.max(0, Math.min(1, fadeAlpha + fadeDir * 0.015));
     ctx.fillStyle = `rgba(0,0,0,${fadeAlpha})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    if (fadeAlpha >= 1 && !transitioned) {
-      transitioned = true;
-      onIntroDone();
-      return;
+    if (fadeDir === 1 && fadeAlpha >= 1) {
+      fadeDir = 0;
+      const cb = fadeCallback; fadeCallback = null;
+      if (cb) cb();
+    } else if (fadeDir === -1 && fadeAlpha <= 0) {
+      fadeDir = 0;
     }
   }
 
